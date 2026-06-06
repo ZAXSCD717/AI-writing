@@ -83,7 +83,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-后端启动在 `http://localhost:8080`
+后端启动在 `http://localhost:8888`
 
 ### 5. 启动前端
 

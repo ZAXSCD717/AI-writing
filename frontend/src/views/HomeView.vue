@@ -79,6 +79,7 @@ import { Upload, Document, Download } from '@element-plus/icons-vue'
   margin: 40px auto;
   padding: 0 20px;
   min-height: 400px;
+  overflow-x: hidden;
 }
 
 .feature-cards {

@@ -1,6 +1,7 @@
 package com.ainovel.backend.controller;
 
 import com.ainovel.backend.common.R;
+import com.ainovel.backend.model.dto.ChapterResponse;
 import com.ainovel.backend.model.dto.ConversionRequest;
 import com.ainovel.backend.model.dto.NovelResponse;
 import com.ainovel.backend.model.dto.NovelUploadRequest;
@@ -11,6 +12,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/novels")
@@ -42,6 +45,15 @@ public class NovelController {
     }
 
     /**
+     * Get parsed chapters for a novel
+     */
+    @GetMapping("/{id}/chapters")
+    public R<List<ChapterResponse>> getChapters(@PathVariable Long id) {
+        List<ChapterResponse> chapters = novelService.getChapters(id);
+        return R.ok(chapters);
+    }
+
+    /**
      * List novels with pagination
      */
     @GetMapping
@@ -54,10 +66,12 @@ public class NovelController {
 
     /**
      * Convert novel to screenplay (initiates AI conversion)
+     * Optionally accepts chapterIndices in request body for selected chapters.
      */
     @PostMapping("/{id}/convert")
-    public R<ScriptResponse> convertNovel(@PathVariable Long id) {
-        ScriptResponse response = scriptService.convertNovelToScript(id);
+    public R<ScriptResponse> convertNovel(@PathVariable Long id, @RequestBody(required = false) ConversionRequest request) {
+        List<Integer> chapterIndices = (request != null) ? request.getChapterIndices() : null;
+        ScriptResponse response = scriptService.convertNovelToScript(id, chapterIndices);
         return R.ok(response);
     }
 }

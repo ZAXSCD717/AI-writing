@@ -12,6 +12,11 @@ export function listNovels(page = 1, size = 10) {
   return request.get('/novels', { params: { page, size } })
 }
 
-export function convertNovel(id) {
-  return request.post(`/novels/${id}/convert`)
+export function getChapters(id) {
+  return request.get(`/novels/${id}/chapters`)
+}
+
+export function convertNovel(id, chapterIndices = null) {
+  const data = chapterIndices ? { chapterIndices } : {}
+  return request.post(`/novels/${id}/convert`, data)
 }

@@ -22,6 +22,45 @@
             <el-input v-model="form.author" placeholder="请输入原著作者（选填）" />
           </el-form-item>
 
+          <el-form-item label="上传文件">
+            <div class="upload-row">
+              <el-upload
+                ref="uploadRef"
+                :auto-upload="false"
+                :show-file-list="true"
+                :limit="1"
+                accept=".txt,.md"
+                @change="handleFileSelect"
+              >
+                <el-button type="primary" plain>
+                  <el-icon><Upload /></el-icon> 选择 .txt 文件
+                </el-button>
+                <template #tip>
+                  <div class="el-upload__tip">
+                    支持 .txt / .md 格式
+                  </div>
+                </template>
+              </el-upload>
+              <div class="encoding-group" v-if="fileSelected">
+                <el-select v-model="selectedEncoding" class="encoding-select" size="default">
+                  <el-option label="UTF-8" value="UTF-8" />
+                  <el-option label="GBK" value="GBK" />
+                  <el-option label="GB2312" value="GB2312" />
+                  <el-option label="GB18030" value="GB18030" />
+                  <el-option label="Big5 (繁体)" value="Big5" />
+                  <el-option label="Shift-JIS (日文)" value="Shift-JIS" />
+                  <el-option label="EUC-KR (韩文)" value="EUC-KR" />
+                  <el-option label="Latin-1" value="ISO-8859-1" />
+                </el-select>
+                <el-button type="success" size="default" @click="readFile">
+                  <el-icon><Download /></el-icon> 读取
+                </el-button>
+              </div>
+            </div>
+          </el-form-item>
+
+          <el-divider>或手动粘贴</el-divider>
+
           <el-form-item label="小说内容" prop="content">
             <el-input
               v-model="form.content"
@@ -40,20 +79,12 @@
 
           <el-form-item>
             <el-button type="primary" @click="handleSubmit" :loading="submitting" size="large">
-              {{ submitting ? '上传中...' : '上传并转换' }}
+              {{ submitting ? '上传中...' : '上传并选择章节' }}
             </el-button>
             <el-button @click="handleClear" size="large">清空</el-button>
           </el-form-item>
         </el-form>
       </el-card>
-
-      <!-- Conversion Progress Modal -->
-      <el-dialog v-model="showProgress" title="AI 剧本生成中" :close-on-click-modal="false" width="400px">
-        <div class="progress-content">
-          <el-progress type="circle" :percentage="progressPercent" :status="progressStatus" />
-          <p class="progress-text">{{ progressText }}</p>
-        </div>
-      </el-dialog>
     </el-main>
   </el-container>
 </template>
@@ -62,16 +93,16 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft } from '@element-plus/icons-vue'
-import { uploadNovel, convertNovel } from '../api/novel'
+import { ArrowLeft, Upload, Download } from '@element-plus/icons-vue'
+import { uploadNovel } from '../api/novel'
 
 const router = useRouter()
 const formRef = ref(null)
+const uploadRef = ref(null)
 const submitting = ref(false)
-const showProgress = ref(false)
-const progressPercent = ref(0)
-const progressStatus = ref('')
-const progressText = ref('')
+const selectedEncoding = ref('UTF-8')
+const fileSelected = ref(false)
+const pendingFile = ref(null)
 
 const form = ref({
   title: '',
@@ -81,7 +112,7 @@ const form = ref({
 
 const rules = {
   title: [{ required: true, message: '请输入小说标题', trigger: 'blur' }],
-  content: [{ required: true, message: '请输入小说正文内容', trigger: 'blur' }]
+  content: [{ required: true, message: '请输入小说正文内容或上传文件', trigger: 'blur' }]
 }
 
 const chapterCount = computed(() => {
@@ -99,9 +130,42 @@ const chapterCount = computed(() => {
   return count || Math.ceil(content.length / 2000)
 })
 
+function handleFileSelect(file) {
+  pendingFile.value = file
+  fileSelected.value = true
+
+  // Auto-fill title from filename (strip extension)
+  const name = file.name.replace(/\.[^.]+$/, '')
+  if (!form.value.title) {
+    form.value.title = name
+  }
+
+  ElMessage.info(`已选择文件：${file.name}，请选择编码后点击「读取」`)
+}
+
+function readFile() {
+  if (!pendingFile.value) return
+  const reader = new FileReader()
+  const encoding = selectedEncoding.value || 'UTF-8'
+  reader.onload = (e) => {
+    const text = e.target.result
+    form.value.content = text
+    ElMessage.success(`已读取文件：${pendingFile.value.name}（${text.length} 字符，${encoding}）`)
+  }
+  reader.onerror = () => {
+    ElMessage.error('文件读取失败，请检查编码设置')
+  }
+  reader.readAsText(pendingFile.value.raw, encoding)
+}
+
 async function handleSubmit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
+
+  if (!form.value.content || form.value.content.trim().length === 0) {
+    ElMessage.warning('请粘贴小说内容或上传 .txt 文件')
+    return
+  }
 
   if (chapterCount.value < 3) {
     ElMessage.warning('至少需要 3 个章节的内容才能生成剧本')
@@ -111,35 +175,19 @@ async function handleSubmit() {
   submitting.value = true
 
   try {
-    // Step 1: Upload novel
     const novel = await uploadNovel({
       title: form.value.title,
       author: form.value.author || '未知',
       content: form.value.content
     })
 
-    ElMessage.success('小说上传成功，开始 AI 转换...')
+    ElMessage.success('小说上传成功！请选择要转换的章节')
 
-    // Step 2: Show progress dialog
-    showProgress.value = true
-    progressPercent.value = 10
-    progressText.value = '正在分析小说结构和角色...'
-
-    // Step 3: Convert to script
-    const script = await convertNovel(novel.id)
-
-    progressPercent.value = 100
-    progressStatus.value = 'success'
-    progressText.value = '剧本生成完成！'
-
-    setTimeout(() => {
-      showProgress.value = false
-      router.push(`/scripts/${script.id}`)
-    }, 1000)
+    // Navigate to chapter selection page
+    router.push(`/novels/${novel.id}/chapters`)
 
   } catch (err) {
-    showProgress.value = false
-    ElMessage.error('转换失败: ' + (err.message || '未知错误'))
+    ElMessage.error('上传失败: ' + (err.message || '未知错误'))
   } finally {
     submitting.value = false
   }
@@ -181,13 +229,14 @@ function handleClear() {
   font-size: 0.9em;
 }
 
-.progress-content {
-  text-align: center;
-  padding: 30px;
+.upload-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.progress-text {
-  margin-top: 20px;
-  color: #666;
+.encoding-select {
+  width: 150px;
 }
 </style>

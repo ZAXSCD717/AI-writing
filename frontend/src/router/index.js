@@ -18,6 +18,12 @@ const routes = [
     component: () => import('../views/ScriptListView.vue')
   },
   {
+    path: '/novels/:id/chapters',
+    name: 'ChapterSelect',
+    component: () => import('../views/ChapterSelectView.vue'),
+    props: true
+  },
+  {
     path: '/scripts/:id',
     name: 'ScriptDetail',
     component: () => import('../views/ScriptDetailView.vue'),

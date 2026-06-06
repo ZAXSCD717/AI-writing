@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -22,10 +25,20 @@ public class AiConversionServiceImpl implements AiConversionService {
 
     @Override
     public String convertNovelToScript(Novel novel) {
-        String userPrompt = buildUserPrompt(novel);
+        return convertNovelToScript(novel, List.of(novel.getContent()));
+    }
 
-        log.info("Sending novel '{}' ({} chapters) to AI for conversion...",
-                novel.getTitle(), novel.getChapters());
+    @Override
+    public String convertNovelToScript(Novel novel, List<String> chapterTexts) {
+        int chapterCount = chapterTexts.size();
+        log.info("Sending novel '{}' ({} chapters selected) to AI for conversion...",
+                novel.getTitle(), chapterCount);
+
+        String userPrompt = buildUserPrompt(
+                novel.getTitle(), novel.getAuthor(), chapterCount,
+                chapterTexts.size() == 1 ? chapterTexts.get(0) : chapterTexts.stream()
+                        .collect(Collectors.joining("\n\n---\n\n"))
+        );
 
         try {
             String response = chatClient.prompt()
@@ -56,13 +69,13 @@ public class AiConversionServiceImpl implements AiConversionService {
      * Build the user prompt with novel content.
      * If the novel is very long, we truncate to fit within token limits.
      */
-    private String buildUserPrompt(Novel novel) {
+    private String buildUserPrompt(String title, String author, int chapters, String content) {
         String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-        String content = novel.getContent();
 
         // Truncate if too long (DeepSeek has ~64K context, but we reserve tokens for output)
         int maxContentLength = 30000;
         if (content.length() > maxContentLength) {
+            int showChapterInfo = chapters;
             log.warn("Novel content too long ({} chars), truncating to {} chars",
                     content.length(), maxContentLength);
             content = content.substring(0, maxContentLength)
@@ -82,9 +95,9 @@ public class AiConversionServiceImpl implements AiConversionService {
                 
                 %s
                 """,
-                novel.getTitle(),
-                novel.getAuthor(),
-                novel.getChapters(),
+                title,
+                author,
+                chapters,
                 today,
                 content
         );

@@ -5,12 +5,19 @@ import com.ainovel.backend.model.dto.ScriptUpdateRequest;
 import com.ainovel.backend.model.entity.Script;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 
+import java.util.List;
+
 public interface ScriptService {
 
     /**
-     * Generate screenplay from novel using AI
+     * Generate screenplay from novel using AI (all chapters)
      */
     ScriptResponse convertNovelToScript(Long novelId);
+
+    /**
+     * Generate screenplay from novel using AI (selected chapters)
+     */
+    ScriptResponse convertNovelToScript(Long novelId, List<Integer> chapterIndices);
 
     /**
      * Get script by ID
