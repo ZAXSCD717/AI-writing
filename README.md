@@ -1,9 +1,5 @@
 # AI 小说转剧本工具
 
-> XEngineer 新工科计划 · 第三批议题 · 72小时极限开发
->
-> **议题：AI 小说转剧本工具** — 将 3 章以上的小说文本自动转换为结构化剧本（YAML 格式）
-
 ---
 
 ## 项目简介
@@ -195,40 +191,6 @@ AI Novel to Script Tool/
 
 ---
 
-## 开发计划（72小时）
-
-| 日期 | PR | 内容 |
-|------|----|------|
-| Day 1 (6/5) | #1 | 项目脚手架初始化 |
-| Day 1 (6/5) | #2 | YAML Schema 设计文档 |
-| Day 1 (6/5) | #3 | 数据库表 + 实体层 |
-| Day 2 (6/6) | #4 | DeepSeek API 集成 + 转换服务 |
-| Day 2 (6/6) | #5 | REST API 控制器 |
-| Day 2 (6/6) | #6 | 前端页面（Vue 3 + Element Plus） |
-| Day 3 (6/7) | #7 | README + 最终整合 |
-
----
-
-## 评审说明
-
-本项目参与 [XEngineer 新工科计划](https://mp.weixin.qq.com/s/cKC_FRtAbQ0zAiq0Y1I5_g) 第三批议题提交。
-
-- 所有 PR 均保持小粒度、单一职责
-- 全周期持续提交，commit 分布于开发周期的每一天
-- 主分支代码保持可运行状态
-- 第三方依赖已在 README 中列明
-
-### 依赖声明
-
-| 依赖 | 用途 | 说明 |
-|------|------|------|
-| Spring Boot 3.4.3 | 后端框架 | 原创功能：AI 转换、剧本管理 API |
-| Spring AI 1.0.4 | AI 集成 | 原创功能：Prompt 工程、YAML 提取 |
-| MyBatis-Plus 3.5.9 | ORM | 原创功能：数据库设计、服务层 |
-| Vue 3 + Element Plus | 前端 UI | 原创功能：小说上传、剧本编辑页面 |
-
----
-
 ## Demo 视频
 
 <!-- TODO: 替换为你的 Demo 视频链接 -->
@@ -238,4 +200,4 @@ AI Novel to Script Tool/
 
 ## 许可证
 
-本项目仅用于 XEngineer 新工科计划作品提交，版权归作者所有。
+MIT License © 2024
