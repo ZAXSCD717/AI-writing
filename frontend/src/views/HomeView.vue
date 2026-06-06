@@ -117,18 +117,23 @@
           查看全部 <el-icon><ArrowRight /></el-icon>
         </el-link>
       </div>
-      <el-table :data="recentScripts" style="width: 100%" class="recent-table">
-        <el-table-column prop="title" label="剧本标题" />
-        <el-table-column prop="sourceNovel" label="来源小说" />
-        <el-table-column prop="charCount" label="角色数量" width="120" />
-        <el-table-column prop="sceneCount" label="场景数量" width="120" />
-        <el-table-column prop="updateTime" label="更新时间" width="180" />
-        <el-table-column label="操作" width="220">
+      <el-table :data="recentScripts" v-loading="loadingScripts" style="width: 100%" class="recent-table">
+        <el-table-column prop="title" label="剧本标题" min-width="160" />
+        <el-table-column prop="novelTitle" label="来源小说" min-width="140" />
+        <el-table-column prop="status" label="状态" width="90">
           <template #default="{ row }">
-            <el-button link type="primary" size="small">查看</el-button>
-            <el-button link type="primary" size="small">编辑</el-button>
-            <el-button link type="primary" size="small">导出</el-button>
-            <el-button link type="danger" size="small">删除</el-button>
+            <el-tag :type="row.status === 'published' ? 'success' : 'info'" size="small">
+              {{ row.status === 'published' ? '已发布' : '草稿' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="更新时间" width="170">
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" fixed="right">
+          <template #default="{ row }">
+            <el-button link type="primary" size="small" @click="$router.push(`/scripts/${row.id}`)">查看</el-button>
+            <el-button link type="primary" size="small" @click="handleExport(row.id)">导出</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -142,35 +147,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { 
   Reading, Upload, VideoCamera, Right, Notebook, 
   MagicStick, Edit, Download, Folder, ArrowRight, Monitor 
 } from '@element-plus/icons-vue'
+import { listScripts } from '../api/script'
 
-const recentScripts = ref([
-  {
-    title: '命运之轮',
-    sourceNovel: '命运之轮.txt',
-    charCount: 8,
-    sceneCount: 12,
-    updateTime: '2024-06-01 14:30'
-  },
-  {
-    title: '逆天成神',
-    sourceNovel: '逆天成神.txt',
-    charCount: 12,
-    sceneCount: 20,
-    updateTime: '2024-05-31 18:45'
-  },
-  {
-    title: '都市之最强高手',
-    sourceNovel: '都市之最强高手.txt',
-    charCount: 6,
-    sceneCount: 15,
-    updateTime: '2024-05-30 09:20'
+const loadingScripts = ref(false)
+const recentScripts = ref([])
+
+onMounted(async () => {
+  loadingScripts.value = true
+  try {
+    const data = await listScripts(1, 5)
+    recentScripts.value = (data.records || []).slice(0, 5)
+  } catch (err) {
+    // Silently fail — home page still renders
+  } finally {
+    loadingScripts.value = false
   }
-])
+})
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  return dateStr.substring(0, 19).replace('T', ' ')
+}
+
+function handleExport(id) {
+  window.open(`/api/scripts/${id}/export`, '_blank')
+}
 </script>
 
 <style scoped>

@@ -1,14 +1,32 @@
 <template>
-  <el-container>
-    <el-header class="sub-header">
-      <el-button text @click="$router.push('/')" class="back-btn">
-        <el-icon><ArrowLeft /></el-icon> 返回首页
-      </el-button>
-      <h2>上传小说</h2>
+  <div class="page-wrapper">
+    <!-- 导航栏 -->
+    <el-header class="nav-header">
+      <div class="nav-content">
+        <div class="nav-left">
+          <el-icon class="logo-icon" :size="32"><Reading /></el-icon>
+          <span class="logo-text">AI 小说转剧本工具</span>
+        </div>
+        <div class="nav-center">
+          <span class="nav-link" @click="$router.push('/')">首页</span>
+          <span class="nav-link" @click="$router.push('/scripts')">我的剧本</span>
+          <span class="nav-link">使用指南</span>
+        </div>
+        <div class="nav-right">
+          <el-button type="primary" round disabled>
+            <el-icon><Upload /></el-icon>
+            上传小说
+          </el-button>
+        </div>
+      </div>
     </el-header>
 
     <el-main class="main">
-      <el-card class="upload-card">
+      <div class="page-header">
+        <h2>上传小说</h2>
+      </div>
+
+      <el-card class="upload-card" shadow="never">
         <template #header>
           <span>小说信息</span>
         </template>
@@ -86,14 +104,19 @@
         </el-form>
       </el-card>
     </el-main>
-  </el-container>
+
+    <!-- 页脚 -->
+    <footer class="page-footer">
+      <p>© 2024 AI 小说转剧本工具 · 基于 Spring Boot & Vue 3 构建</p>
+    </footer>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { ArrowLeft, Upload, Download } from '@element-plus/icons-vue'
+import { Reading, Upload, Download } from '@element-plus/icons-vue'
 import { uploadNovel } from '../api/novel'
 
 const router = useRouter()
@@ -133,13 +156,10 @@ const chapterCount = computed(() => {
 function handleFileSelect(file) {
   pendingFile.value = file
   fileSelected.value = true
-
-  // Auto-fill title from filename (strip extension)
   const name = file.name.replace(/\.[^.]+$/, '')
   if (!form.value.title) {
     form.value.title = name
   }
-
   ElMessage.info(`已选择文件：${file.name}，请选择编码后点击「读取」`)
 }
 
@@ -182,8 +202,6 @@ async function handleSubmit() {
     })
 
     ElMessage.success('小说上传成功！请选择要转换的章节')
-
-    // Navigate to chapter selection page
     router.push(`/novels/${novel.id}/chapters`)
 
   } catch (err) {
@@ -199,29 +217,75 @@ function handleClear() {
 </script>
 
 <style scoped>
-.sub-header {
+.page-wrapper {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+/* 导航栏 — 与首页一致 */
+.nav-header {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: 64px !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 16px;
-  background: white;
-  border-bottom: 1px solid #eee;
+  justify-content: space-between;
   padding: 0 20px;
-  height: 60px;
 }
 
-.sub-header h2 {
-  margin: 0;
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon { color: #409eff; }
+
+.logo-text {
   font-size: 1.2em;
+  font-weight: 600;
+  color: #303133;
 }
 
-.back-btn {
-  font-size: 14px;
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: 32px;
 }
+
+.nav-link {
+  cursor: pointer;
+  color: #606266;
+  font-size: 0.95em;
+  transition: color 0.2s;
+}
+
+.nav-link:hover { color: #409eff; }
 
 .main {
   max-width: 800px;
-  margin: 20px auto;
-  padding: 0 20px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.page-header h2 {
+  margin: 0 0 20px 0;
+  font-size: 1.5em;
+  color: #303133;
+}
+
+.upload-card {
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
 }
 
 .char-count {
@@ -239,4 +303,15 @@ function handleClear() {
 .encoding-select {
   width: 150px;
 }
+
+/* 页脚 */
+.page-footer {
+  background: #303133;
+  color: #909399;
+  text-align: center;
+  padding: 24px 20px;
+  font-size: 0.9em;
+}
+
+.page-footer p { margin: 0; }
 </style>
