@@ -71,7 +71,7 @@
               </div>
             </div>
             <div class="code-badge">
-              <el-icon :size="24"><Code /></el-icon>
+              <el-icon :size="24"><Notebook /></el-icon>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@
 <script setup>
 import { ref } from 'vue'
 import { 
-  Reading, Upload, VideoCamera, Right, Code, 
+  Reading, Upload, VideoCamera, Right, Notebook, 
   MagicStick, Edit, Download, Folder, ArrowRight, Monitor 
 } from '@element-plus/icons-vue'
 
