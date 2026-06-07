@@ -21,6 +21,7 @@ public class ScriptResponse {
     private String yamlContent;
     private String version;
     private String status;
+    private boolean compressed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

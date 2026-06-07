@@ -6,6 +6,7 @@ import com.ainovel.backend.model.dto.ScriptResponse;
 import com.ainovel.backend.model.dto.ScriptUpdateRequest;
 import com.ainovel.backend.model.entity.Novel;
 import com.ainovel.backend.model.entity.Script;
+import com.ainovel.backend.service.AiConversionResult;
 import com.ainovel.backend.service.AiConversionService;
 import com.ainovel.backend.service.NovelService;
 import com.ainovel.backend.service.ScriptService;
@@ -66,14 +67,14 @@ public class ScriptServiceImpl implements ScriptService {
         }
 
         // Call AI to convert novel to screenplay
-        String yamlContent = aiConversionService.convertNovelToScript(novel, chapterTexts);
+        AiConversionResult result = aiConversionService.convertNovelToScript(novel, chapterTexts);
 
         // Save script
         Script script = new Script();
         script.setNovelId(novelId);
         script.setTitle(novel.getTitle() + "·剧本版");
         script.setDescription("基于《" + novel.getTitle() + "》的AI改编剧本（已选" + chapterTexts.size() + "章）");
-        script.setYamlContent(yamlContent);
+        script.setYamlContent(result.getYamlContent());
         script.setVersion("1.0.0");
         script.setStatus("draft");
 
@@ -85,7 +86,9 @@ public class ScriptServiceImpl implements ScriptService {
         updateTarget.setStatus("converted");
         novelMapper.updateById(updateTarget);
 
-        return toResponse(script, novel.getTitle());
+        ScriptResponse response = toResponse(script, novel.getTitle());
+        response.setCompressed(result.isCompressed());
+        return response;
     }
 
     /**

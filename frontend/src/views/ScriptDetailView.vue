@@ -34,6 +34,16 @@
         </div>
       </div>
 
+      <el-alert
+        v-if="script?.compressed"
+        type="warning"
+        show-icon
+        :closable="false"
+        title="内容已压缩"
+        description="该剧本基于压缩后的小说内容生成（原始小说较长，已对每章节内容进行压缩），建议检查并补充可能遗漏的细节。"
+        class="compression-alert"
+      />
+
       <el-card v-loading="loading" class="detail-card" shadow="never">
         <template v-if="script">
           <el-descriptions :column="2" border>
