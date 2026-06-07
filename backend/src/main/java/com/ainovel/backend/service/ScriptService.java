@@ -35,6 +35,11 @@ public interface ScriptService {
     ScriptResponse updateScript(Long id, ScriptUpdateRequest request);
 
     /**
+     * Delete a script (logical delete)
+     */
+    void deleteScript(Long id);
+
+    /**
      * Export script as YAML string
      */
     String exportScriptYaml(Long id);

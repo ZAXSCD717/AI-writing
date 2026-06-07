@@ -154,6 +154,15 @@ public class ScriptServiceImpl implements ScriptService {
     }
 
     @Override
+    public void deleteScript(Long id) {
+        Script script = scriptMapper.selectById(id);
+        if (script == null) {
+            throw new RuntimeException("剧本不存在: " + id);
+        }
+        scriptMapper.deleteById(id);
+    }
+
+    @Override
     public String exportScriptYaml(Long id) {
         Script script = scriptMapper.selectById(id);
         if (script == null) {

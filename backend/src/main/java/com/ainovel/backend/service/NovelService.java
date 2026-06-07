@@ -34,4 +34,9 @@ public interface NovelService {
      * Parse novel content into chapter list
      */
     List<ChapterResponse> getChapters(Long novelId);
+
+    /**
+     * Delete a novel (logical delete)
+     */
+    void deleteNovel(Long id);
 }

@@ -45,6 +45,15 @@ public class ScriptController {
     }
 
     /**
+     * Delete a script
+     */
+    @DeleteMapping("/{id}")
+    public R<Void> deleteScript(@PathVariable Long id) {
+        scriptService.deleteScript(id);
+        return R.ok();
+    }
+
+    /**
      * Update script (manual editing)
      */
     @PutMapping("/{id}")

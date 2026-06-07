@@ -65,6 +65,15 @@ public class NovelController {
     }
 
     /**
+     * Delete a novel
+     */
+    @DeleteMapping("/{id}")
+    public R<Void> deleteNovel(@PathVariable Long id) {
+        novelService.deleteNovel(id);
+        return R.ok();
+    }
+
+    /**
      * Convert novel to screenplay (initiates AI conversion)
      * Optionally accepts chapterIndices in request body for selected chapters.
      */

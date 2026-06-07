@@ -12,6 +12,10 @@ export function updateScript(id, data) {
   return request.put(`/scripts/${id}`, data)
 }
 
+export function deleteScript(id) {
+  return request.delete(`/scripts/${id}`)
+}
+
 export function exportScript(id) {
   return `${request.defaults.baseURL}/scripts/${id}/export`
 }

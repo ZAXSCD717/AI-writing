@@ -80,65 +80,110 @@
       </div>
     </section>
 
-    <!-- 功能特点 -->
-    <section class="features-section">
-      <div class="features-grid">
-        <div class="feature-card">
-          <el-icon class="feature-icon" :size="36"><Reading /></el-icon>
-          <h3>小说上传</h3>
-          <p>支持长篇小说粘贴，自动检测章节数量，至少 3 章即可转换</p>
+    <!-- 快捷入口 -->
+    <section class="quick-actions">
+      <div class="quick-grid">
+        <div class="quick-card" @click="$router.push('/novel/input')">
+          <el-icon class="quick-icon" :size="40"><Upload /></el-icon>
+          <div class="quick-info">
+            <h3>上传小说</h3>
+            <p>支持 .txt 文件上传或手动粘贴，选择章节生成剧本</p>
+          </div>
+          <el-icon class="quick-arrow"><ArrowRight /></el-icon>
         </div>
-        <div class="feature-card">
-          <el-icon class="feature-icon" :size="36"><MagicStick /></el-icon>
-          <h3>AI 自动转换</h3>
-          <p>DeepSeek AI 分析小说内容，识别角色、场景、情节，生成结构化 YAML 剧本</p>
+        <div class="quick-card" @click="scrollToNovels">
+          <el-icon class="quick-icon" :size="40"><Reading /></el-icon>
+          <div class="quick-info">
+            <h3>小说管理</h3>
+            <p>查看已上传的小说，选择章节生成剧本</p>
+          </div>
+          <el-icon class="quick-arrow"><ArrowRight /></el-icon>
         </div>
-        <div class="feature-card">
-          <el-icon class="feature-icon" :size="36"><Edit /></el-icon>
-          <h3>在线编辑</h3>
-          <p>在线预览和编辑 YAML 剧本，支持语法高亮、自动补全，编辑更高效</p>
-        </div>
-        <div class="feature-card">
-          <el-icon class="feature-icon" :size="36"><Download /></el-icon>
-          <h3>YAML 导出</h3>
-          <p>一键导出标准 YAML 格式，兼容各类剧本工具，便于分享与使用</p>
-        </div>
-        <div class="feature-card">
-          <el-icon class="feature-icon" :size="36"><Folder /></el-icon>
-          <h3>剧本管理</h3>
-          <p>多剧本列表管理，支持查看、编辑、导出、删除等操作</p>
+        <div class="quick-card" @click="$router.push('/scripts')">
+          <el-icon class="quick-icon" :size="40"><Folder /></el-icon>
+          <div class="quick-info">
+            <h3>剧本管理</h3>
+            <p>查看、编辑、导出、删除已生成的剧本</p>
+          </div>
+          <el-icon class="quick-arrow"><ArrowRight /></el-icon>
         </div>
       </div>
     </section>
 
-    <!-- 最近的剧本 -->
-    <section class="recent-section">
-      <div class="recent-header">
-        <h2 class="recent-title">最近的剧本</h2>
+    <!-- 小说管理 -->
+    <section class="novels-section" ref="novelsSectionRef">
+      <div class="section-header-row">
+        <h2 class="section-title">小说管理</h2>
+        <el-button type="primary" @click="$router.push('/novel/input')">
+          <el-icon><Upload /></el-icon> 上传新小说
+        </el-button>
+      </div>
+      <el-card class="section-card" shadow="never">
+        <el-table :data="novels" v-loading="loadingNovels" stripe style="width: 100%">
+          <el-table-column prop="title" label="小说标题" min-width="160" />
+          <el-table-column prop="author" label="作者" width="120" />
+          <el-table-column prop="chapters" label="章节数" width="80" />
+          <el-table-column prop="status" label="状态" width="90">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'converted' ? 'success' : 'info'" size="small">
+                {{ row.status === 'converted' ? '已转换' : '待转换' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="上传时间" width="170">
+            <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="280" fixed="right">
+            <template #default="{ row }">
+              <el-button type="primary" link size="small" @click="$router.push(`/novels/${row.id}/chapters`)">
+                选择章节生成
+              </el-button>
+              <el-button type="danger" link size="small" @click="handleDeleteNovel(row.id, row.title)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="!loadingNovels && novels.length === 0" description="还没有上传小说">
+          <el-button type="primary" @click="$router.push('/novel/input')">上传小说</el-button>
+        </el-empty>
+      </el-card>
+    </section>
+
+    <!-- 剧本管理 -->
+    <section class="scripts-section">
+      <div class="section-header-row">
+        <h2 class="section-title">最近的剧本</h2>
         <el-link type="primary" @click="$router.push('/scripts')">
           查看全部 <el-icon><ArrowRight /></el-icon>
         </el-link>
       </div>
-      <el-table :data="recentScripts" v-loading="loadingScripts" style="width: 100%" class="recent-table">
-        <el-table-column prop="title" label="剧本标题" min-width="160" />
-        <el-table-column prop="novelTitle" label="来源小说" min-width="140" />
-        <el-table-column prop="status" label="状态" width="90">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 'published' ? 'success' : 'info'" size="small">
-              {{ row.status === 'published' ? '已发布' : '草稿' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="createdAt" label="更新时间" width="170">
-          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="160" fixed="right">
-          <template #default="{ row }">
-            <el-button link type="primary" size="small" @click="$router.push(`/scripts/${row.id}`)">查看</el-button>
-            <el-button link type="primary" size="small" @click="handleExport(row.id)">导出</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      <el-card class="section-card" shadow="never">
+        <el-table :data="recentScripts" v-loading="loadingScripts" stripe style="width: 100%">
+          <el-table-column prop="title" label="剧本标题" min-width="160" />
+          <el-table-column prop="novelTitle" label="来源小说" min-width="140" />
+          <el-table-column prop="status" label="状态" width="90">
+            <template #default="{ row }">
+              <el-tag :type="row.status === 'published' ? 'success' : 'info'" size="small">
+                {{ row.status === 'published' ? '已发布' : '草稿' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="createdAt" label="更新时间" width="170">
+            <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="240" fixed="right">
+            <template #default="{ row }">
+              <el-button link type="primary" size="small" @click="$router.push(`/scripts/${row.id}`)">查看</el-button>
+              <el-button link type="primary" size="small" @click="handleExport(row.id)">导出</el-button>
+              <el-button link type="danger" size="small" @click="handleDeleteScript(row.id, row.title)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-empty v-if="!loadingScripts && recentScripts.length === 0" description="还没有剧本，快去上传小说吧！">
+          <el-button type="primary" @click="$router.push('/novel/input')">上传小说</el-button>
+        </el-empty>
+      </el-card>
     </section>
 
     </div>
@@ -152,27 +197,83 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
   Reading, Upload, VideoCamera, Right, Notebook, 
-  MagicStick, Edit, Download, Folder, ArrowRight, Monitor 
+  ArrowRight, Monitor 
 } from '@element-plus/icons-vue'
-import { listScripts } from '../api/script'
+import { listNovels, deleteNovel } from '../api/novel'
+import { listScripts, deleteScript } from '../api/script'
 
-const loadingScripts = ref(false)
+const novelsSectionRef = ref(null)
+
+const loadingNovels = ref(true)
+const novels = ref([])
+
+const loadingScripts = ref(true)
 const recentScripts = ref([])
 
 onMounted(async () => {
+  await Promise.all([loadNovels(), loadScripts()])
+})
+
+async function loadNovels() {
+  loadingNovels.value = true
+  try {
+    const data = await listNovels(1, 100)
+    novels.value = data.records || []
+  } catch (err) {
+    // Silently fail
+  } finally {
+    loadingNovels.value = false
+  }
+}
+
+async function loadScripts() {
   loadingScripts.value = true
   try {
     const data = await listScripts(1, 5)
     recentScripts.value = (data.records || []).slice(0, 5)
   } catch (err) {
-    // Silently fail — home page still renders
+    // Silently fail
   } finally {
     loadingScripts.value = false
   }
-})
+}
+
+async function handleDeleteNovel(id, title) {
+  try {
+    await ElMessageBox.confirm(`确定要删除小说《${title}》吗？此操作不可恢复。`, '确认删除', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deleteNovel(id)
+    ElMessage.success('删除成功')
+    await loadNovels()
+  } catch (err) {
+    if (err !== 'cancel') {
+      ElMessage.error('删除失败: ' + (err.message || '未知错误'))
+    }
+  }
+}
+
+async function handleDeleteScript(id, title) {
+  try {
+    await ElMessageBox.confirm(`确定要删除剧本《${title}》吗？此操作不可恢复。`, '确认删除', {
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deleteScript(id)
+    ElMessage.success('删除成功')
+    await loadScripts()
+  } catch (err) {
+    if (err !== 'cancel') {
+      ElMessage.error('删除失败: ' + (err.message || '未知错误'))
+    }
+  }
+}
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -181,6 +282,10 @@ function formatDate(dateStr) {
 
 function handleExport(id) {
   window.open(`/api/scripts/${id}/export`, '_blank')
+}
+
+function scrollToNovels() {
+  novelsSectionRef.value?.scrollIntoView({ behavior: 'smooth' })
 }
 </script>
 
@@ -384,80 +489,93 @@ function handleExport(id) {
   box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
 }
 
-/* 功能特点 */
-.features-section {
-  padding: 60px 20px;
-  background: white;
-}
-
-.features-grid {
+/* 快捷入口 */
+.quick-actions {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 40px 20px 0;
+}
+
+.quick-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
-.feature-card {
-  background: #f8f9fa;
-  border-radius: 8px;
-  padding: 24px;
-  text-align: center;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-}
-
-.feature-icon {
-  color: #409eff;
-  margin-bottom: 16px;
-}
-
-.feature-card h3 {
-  font-size: 1.1em;
-  color: #303133;
-  margin: 0 0 12px 0;
-}
-
-.feature-card p {
-  font-size: 0.9em;
-  color: #606266;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* 最近的剧本 */
-.recent-section {
-  padding: 60px 20px;
+.quick-card {
   background: white;
-  margin-top: 20px;
+  border: 1px solid #ebeef5;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s;
 }
 
-.recent-section > div {
+.quick-card:hover {
+  border-color: #409eff;
+  box-shadow: 0 4px 20px rgba(64, 158, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.quick-icon {
+  color: #409eff;
+  flex-shrink: 0;
+}
+
+.quick-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.quick-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.05em;
+  color: #303133;
+}
+
+.quick-info p {
+  margin: 0;
+  font-size: 0.85em;
+  color: #909399;
+}
+
+.quick-arrow {
+  color: #dcdfe6;
+  flex-shrink: 0;
+  transition: color 0.2s;
+}
+
+.quick-card:hover .quick-arrow {
+  color: #409eff;
+}
+
+/* 小说管理 + 剧本管理 */
+.novels-section,
+.scripts-section {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 40px 20px;
 }
 
-.recent-header {
+.section-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
-.recent-title {
-  font-size: 1.5em;
+.section-title {
+  font-size: 1.3em;
   color: #303133;
   margin: 0;
 }
 
-.recent-table {
-  background: white;
+.section-card {
+  border: 1px solid #ebeef5;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* 页脚 */

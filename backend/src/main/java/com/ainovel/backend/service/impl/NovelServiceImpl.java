@@ -213,4 +213,13 @@ public class NovelServiceImpl implements NovelService {
 
         return count;
     }
+
+    @Override
+    public void deleteNovel(Long id) {
+        Novel novel = novelMapper.selectById(id);
+        if (novel == null) {
+            throw new RuntimeException("小说不存在: " + id);
+        }
+        novelMapper.deleteById(id);
+    }
 }

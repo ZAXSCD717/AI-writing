@@ -20,3 +20,7 @@ export function convertNovel(id, chapterIndices = null) {
   const data = chapterIndices ? { chapterIndices } : {}
   return request.post(`/novels/${id}/convert`, data)
 }
+
+export function deleteNovel(id) {
+  return request.delete(`/novels/${id}`)
+}
