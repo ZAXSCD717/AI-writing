@@ -65,7 +65,7 @@
           />
         </div>
 
-        <el-empty v-if="!loading && total === 0" description="还没有剧本，快去上传小说吧！">
+        <el-empty v-if="!loading && scripts.length === 0" description="还没有剧本，快去上传小说吧！">
           <el-button type="primary" @click="$router.push('/novel/input')">上传小说</el-button>
         </el-empty>
       </el-card>
