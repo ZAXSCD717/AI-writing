@@ -22,6 +22,8 @@
       </div>
     </el-header>
 
+    <!-- 主内容 -->
+    <div class="main-content">
     <!-- Hero 区域 -->
     <section class="hero-section">
       <div class="hero-content">
@@ -139,6 +141,8 @@
       </el-table>
     </section>
 
+    </div>
+
     <!-- 页脚 -->
     <footer class="page-footer">
       <p>© 2024 AI 小说转剧本工具 · 基于 Spring Boot & Vue 3 构建</p>
@@ -184,6 +188,12 @@ function handleExport(id) {
 .home-page {
   min-height: 100vh;
   background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
 }
 
 /* 导航栏 */

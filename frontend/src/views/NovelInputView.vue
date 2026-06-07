@@ -220,6 +220,8 @@ function handleClear() {
 .page-wrapper {
   min-height: 100vh;
   background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 导航栏 — 与首页一致 */
@@ -275,6 +277,8 @@ function handleClear() {
   max-width: 800px;
   margin: 0 auto;
   padding: 32px 20px;
+  flex: 1;
+  width: 100%;
 }
 
 .page-header h2 {
