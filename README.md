@@ -194,7 +194,8 @@ AI Novel to Script Tool/
 ## Demo 视频
 
 <!-- TODO: 替换为你的 Demo 视频链接 -->
-> Demo 视频链接：https://www.bilibili.com/video/xxxxx
+> Demo 视频链接：通过网盘分享的文件：6月7日.mp4
+> 链接: https://pan.baidu.com/s/1Tr-HKb47WXzUhaDhDG9hjg?pwd=f28e 提取码: f28e
 
 ---
 
