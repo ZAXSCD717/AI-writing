@@ -84,7 +84,7 @@ import { ElMessage } from 'element-plus'
 import { Reading, Upload } from '@element-plus/icons-vue'
 import { listScripts } from '../api/script'
 
-const loading = ref(false)
+const loading = ref(true)
 const scripts = ref([])
 const total = ref(0)
 const currentPage = ref(1)
